@@ -1,0 +1,35 @@
+# tig config — narrow-friendly defaults
+# https://jonas.github.io/tig/doc/tigrc.5.html
+
+# Layout: stack panes vertically when window is narrow (better in VS Code panel)
+set vertical-split = no
+set split-view-height = 70%
+
+# Main view (commit list)
+set main-view = id date:relative author:abbreviated commit-title:graph=v2,refs=yes
+set main-view-date  = relative
+set main-view-id    = display:yes
+
+# Diff
+set diff-options = -m --first-parent
+set ignore-space = at-eol
+set ignore-case  = smart-case
+
+# Refresh
+set refresh-mode = auto
+
+# Show line numbers in diffs / blame
+set show-changes = yes
+set show-line-numbers = yes
+set blame-options = -C -C -C
+
+# Editor / pager
+set editor-line-number = yes
+set wrap-lines = no
+
+# Bindings — make 'g'/'G' jump to top/bottom (Vim-like) consistently
+bind generic g move-first-line
+bind generic G move-last-line
+
+# Quick refresh
+bind generic R refresh

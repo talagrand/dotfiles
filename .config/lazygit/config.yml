@@ -1,0 +1,38 @@
+# lazygit config — see https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md
+gui:
+  showFileTree: true
+  scrollHeight: 2
+  sidePanelWidth: 0.3333
+  expandFocusedSidePanel: true       # focused panel grows — critical in narrow terms
+  mainPanelSplitMode: 'horizontal'   # stack diff under file list when narrow
+  language: 'en'
+  showRandomTip: false
+  showCommandLog: false
+  nerdFontsVersion: '3'
+  theme:
+    activeBorderColor: ['cyan', 'bold']
+    inactiveBorderColor: ['default']
+    selectedLineBgColor: ['default']
+
+git:
+  paging:
+    colorArg: always
+    pager: delta --paging=never --side-by-side
+  log:
+    order: 'topo-order'
+    showGraph: 'when-maximised'
+  commit:
+    signOff: false
+
+update:
+  method: 'never'   # we install via apt; don't let lazygit self-update
+
+confirmOnQuit: false
+quitOnTopLevelReturn: false
+
+keybinding:
+  universal:
+    quit: 'q'
+    return: '<esc>'
+    nextTab: ']'
+    prevTab: '['

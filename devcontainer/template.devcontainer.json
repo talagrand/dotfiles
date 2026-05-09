@@ -1,0 +1,43 @@
+{
+  // Slim per-repo devcontainer that points at the shared image.
+  // Copy this file to .devcontainer/devcontainer.json in any consuming repo
+  // and edit the per-repo bits (mounts, extensions, name).
+  "name": "Shared dev",
+  "image": "ghcr.io/CHANGE-ME-ORG/devcontainer:latest",
+
+  "containerEnv": {
+    "RUSTC_WRAPPER": "sccache"
+  },
+
+  // Persistent caches across rebuilds (per-Codespace volumes)
+  "mounts": [
+    {
+      "source": "devcontainer-cargo-cache-${devcontainerId}",
+      "target": "/usr/local/cargo",
+      "type": "volume"
+    },
+    {
+      "source": "devcontainer-target-cache-${devcontainerId}",
+      "target": "${containerWorkspaceFolder}/target",
+      "type": "volume"
+    }
+  ],
+
+  "postCreateCommand": "/usr/local/bin/post-create.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-vscode.cpptools",
+        "ms-vscode.powershell",
+        "rust-lang.rust-analyzer",
+        "eamodio.gitlens",
+        "mhutchie.git-graph"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+# Editor backups / swap
+*~
+*.swp
+*.swo
+.DS_Store
+
+# Local-only overrides (never commit secrets)
+*.local
+.gitconfig.local
+bash_profile.local

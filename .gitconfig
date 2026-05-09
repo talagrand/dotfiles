@@ -1,0 +1,84 @@
+# Personal git config — managed by dotfiles repo
+# Override locally with ~/.gitconfig.local (auto-included at the bottom).
+
+[user]
+    # Codespaces will set name/email from your GitHub account; uncomment to override:
+    # name  = Your Name
+    # email = you@example.com
+
+[init]
+    defaultBranch = main
+
+[core]
+    pager     = delta
+    editor    = vim
+    autocrlf  = input
+    excludesfile = ~/.gitignore_global
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate         = true
+    side-by-side     = true
+    line-numbers     = true
+    syntax-theme     = Monokai Extended
+    file-decoration-style = blue ul
+    hunk-header-decoration-style = blue box
+
+[merge]
+    conflictstyle = zdiff3
+
+[diff]
+    algorithm     = histogram
+    colorMoved    = default
+    renames       = copies
+
+[pull]
+    rebase = true
+
+[rebase]
+    autoSquash = true
+    autoStash  = true
+
+[fetch]
+    prune     = true
+    pruneTags = true
+
+[push]
+    default      = simple
+    autoSetupRemote = true
+    followTags   = true
+
+[rerere]
+    enabled = true
+
+[log]
+    date = iso
+
+[color]
+    ui = auto
+
+[help]
+    autocorrect = prompt
+
+[alias]
+    st     = status -sb
+    co     = checkout
+    sw     = switch
+    br     = branch
+    ci     = commit
+    cia    = commit --amend --no-edit
+    last   = log -1 HEAD --stat
+    lg     = log --graph --pretty=format:'%C(auto)%h%d %s %C(dim)(%cr) %C(blue)<%an>' --abbrev-commit
+    lol    = log --graph --decorate --oneline --all
+    unstage = reset HEAD --
+    discard = checkout --
+    pushf  = push --force-with-lease
+    fixup  = "!f() { git commit --fixup=$1; }; f"
+    wip    = commit -am 'WIP'
+    nuke   = "!git clean -fdx && git reset --hard"
+
+# Allow per-machine overrides without committing them
+[include]
+    path = ~/.gitconfig.local

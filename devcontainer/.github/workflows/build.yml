@@ -1,0 +1,83 @@
+name: Build & publish dev container image
+
+# Triggers:
+#   - on push to main: rebuild whenever Dockerfile changes
+#   - weekly cron: pick up upstream Linux/distro security patches
+#   - workflow_dispatch: hit "Run workflow" when a CVE drops mid-week
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - 'post-create.sh'
+      - '.github/workflows/build.yml'
+  schedule:
+    - cron: '0 6 * * 1'        # Mondays 06:00 UTC
+  workflow_dispatch: {}
+
+# CHANGE THESE BEFORE PUBLISHING --------------------------------------------
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/devcontainer
+# ---------------------------------------------------------------------------
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to ${{ env.REGISTRY }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute tags
+        id: tags
+        run: |
+          DATE=$(date -u +%Y%m%d)
+          echo "tags=${REGISTRY}/${IMAGE_NAME}:latest,${REGISTRY}/${IMAGE_NAME}:${DATE},${REGISTRY}/${IMAGE_NAME}:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      # Build first (loaded locally) so we can scan before pushing
+      - name: Build (local load for scan)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          pull: true               # critical — re-resolve FROM digest
+          tags: scan:candidate
+
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: scan:candidate
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: os,library
+
+      - name: Build & push (multi-tag)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          pull: true
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Image summary
+        run: |
+          echo "### Published" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.tags.outputs.tags }}" | tr ',' '\n' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

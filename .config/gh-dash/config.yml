@@ -1,0 +1,101 @@
+# gh-dash config -- managed by dotfiles repo
+# Docs: https://dlvhdr.github.io/gh-dash/configuration/
+#
+# The dotfiles installer (install.ps1 / install.sh) GENERATES the live
+# ~/.config/gh-dash/config.yml by concatenating this template with an
+# auto-discovered `repoPaths:` block (scanned from configured roots).
+#
+# Default scan roots:
+#   Windows : C:\src ; T:\src         (override via $env:DOTFILES_REPO_ROOTS)
+#   Unix    : $HOME/src               (override via DOTFILES_REPO_ROOTS, colon-sep)
+#
+# Edits below the AUTO-APPENDED marker in the live file will be
+# overwritten on the next install.* run. Edit THIS template instead.
+#
+# Accounts referenced below:
+#   - @me           -> whoever is the active `gh auth status` user
+#   - talagrand     -> personal GitHub account, referenced explicitly so
+#                      these sections work regardless of active account
+
+defaults:
+  view: prs
+  prsLimit: 30
+  issuesLimit: 30
+  preview:
+    open: true
+    width: 60
+  refetchIntervalMinutes: 30
+  layout:
+    prs:
+      updatedAt:
+        width: 7
+      repo:
+        width: 22
+      author:
+        width: 18
+      assignees:
+        width: 0
+        hidden: true
+      base:
+        width: 0
+        hidden: true
+      lines:
+        width: 16
+    issues:
+      updatedAt:
+        width: 7
+      repo:
+        width: 22
+      author:
+        width: 18
+      assignees:
+        width: 18
+
+# repoPaths is auto-appended below by install.* -- do not add manually here.
+
+prSections:
+  # ---- Personal radar ----
+  - title: My PRs (work)
+    filters: is:open author:@me archived:false
+  - title: My PRs (talagrand)
+    filters: is:open author:talagrand archived:false
+  - title: Needs my review
+    filters: is:open review-requested:@me archived:false
+  - title: Mentions me
+    filters: is:open mentions:@me -author:@me archived:false
+
+  # ---- Monitored repos: microsoft/rulesxp ----
+  - title: rulesxp · open
+    filters: repo:microsoft/rulesxp is:open
+  - title: rulesxp · recently merged
+    filters: repo:microsoft/rulesxp is:merged sort:updated-desc
+    limit: 20
+
+  # ---- Monitored repos: talagrand/wrest ----
+  - title: wrest · open
+    filters: repo:talagrand/wrest is:open
+  - title: wrest · recently merged
+    filters: repo:talagrand/wrest is:merged sort:updated-desc
+    limit: 20
+
+issuesSections:
+  # ---- Personal radar ----
+  - title: My issues (work)
+    filters: is:open author:@me archived:false
+  - title: My issues (talagrand)
+    filters: is:open author:talagrand archived:false
+  - title: Assigned to me
+    filters: is:open assignee:@me archived:false
+  - title: Mentions me
+    filters: is:open mentions:@me -author:@me archived:false
+
+  # ---- Monitored repos ----
+  - title: rulesxp · open issues
+    filters: repo:microsoft/rulesxp is:open
+  - title: wrest · open issues
+    filters: repo:talagrand/wrest is:open
+
+pager:
+  diff: delta
+
+confirmQuit: false

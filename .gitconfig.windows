@@ -1,0 +1,14 @@
+# Windows-only git config overrides — managed by dotfiles repo.
+#
+# This file is symlinked into ~/.gitconfig.windows ONLY by install.ps1.
+# The main .gitconfig references it via [include] path = ~/.gitconfig.windows.
+# On Linux/Mac/Codespaces the symlink doesn't exist, so git silently skips
+# the include and the cross-platform defaults from .gitconfig apply.
+#
+# Git has no built-in [includeIf "os:..."] condition, so this per-OS-symlink
+# pattern is the idiomatic way to do OS-conditional config.
+
+[core]
+    # Native Windows convention: store LF in repo, check out as CRLF.
+    # On Linux/Codespaces the base .gitconfig sets `input` (LF everywhere).
+    autocrlf = true

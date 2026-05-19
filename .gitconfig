@@ -11,9 +11,11 @@
 
 [core]
     pager     = delta
-    editor    = vim
     autocrlf  = input
     excludesfile = ~/.gitignore_global
+    # NOTE: core.editor intentionally NOT set here. On Linux/macOS the
+    # platform-specific ~/.gitconfig.linux override sets it to `vim`.
+    # On Windows we leave it unset so git uses the user's platform default.
 
 [interactive]
     diffFilter = delta --color-only
@@ -41,12 +43,14 @@
     autoSquash = true
     autoStash  = true
 
+[commit]
+    verbose = true
+
 [fetch]
     prune     = true
     pruneTags = true
 
 [push]
-    default      = simple
     autoSetupRemote = true
     followTags   = true
 
@@ -56,8 +60,11 @@
 [log]
     date = iso
 
-[color]
-    ui = auto
+[safe]
+    # Refuse to auto-trust bare repos discovered in the cwd; require the
+    # caller to be inside an explicit GIT_DIR. Defence against malicious
+    # repos planted in shared/extracted folders.
+    bareRepository = explicit
 
 [help]
     autocorrect = prompt
@@ -65,20 +72,25 @@
 [alias]
     st     = status -sb
     co     = checkout
-    sw     = switch
-    br     = branch
-    ci     = commit
-    cia    = commit --amend --no-edit
+    amend  = commit --amend --no-edit
     last   = log -1 HEAD --stat
     lg     = log --graph --pretty=format:'%C(auto)%h%d %s %C(dim)(%cr) %C(blue)<%an>' --abbrev-commit
     lol    = log --graph --decorate --oneline --all
     unstage = reset HEAD --
-    discard = checkout --
     pushf  = push --force-with-lease
     fixup  = "!f() { git commit --fixup=$1; }; f"
     wip    = commit -am 'WIP'
-    nuke   = "!git clean -fdx && git reset --hard"
 
-# Allow per-machine overrides without committing them
+    # difftastic — structural / AST-aware diffs (cargo install --locked difftastic)
+    dft    = -c diff.external=difft diff
+    dfts   = -c diff.external=difft show
+    dftl   = -c diff.external=difft log -p
+
+# Layered overrides (last wins; missing files are silently skipped):
+#   1. ~/.gitconfig.windows  — per-OS overrides (symlinked by install.ps1 only)
+#   2. ~/.gitconfig.linux    — per-OS overrides (symlinked by install.sh only)
+#   3. ~/.gitconfig.local    — per-machine identity, credentials, etc.
 [include]
+    path = ~/.gitconfig.windows
+    path = ~/.gitconfig.linux
     path = ~/.gitconfig.local

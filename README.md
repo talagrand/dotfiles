@@ -32,6 +32,22 @@ On every new Codespace, GitHub will:
 
 Both scripts are idempotent. Re-run after pulling new commits to pick up changes.
 
+### First-run credential / identity migration
+
+The installer replaces `~/.gitconfig` with a symlink into this repo. On the
+very first run, before that swap, it scans the existing `~/.gitconfig` for
+machine-local sections — `[user]`, every `[credential "..."]`, and
+`[filter "lfs"]` — and migrates any matching keys into `~/.gitconfig.local`
+(which is silently included by the base config and is NOT tracked by this
+repo). Keys already present in `~/.gitconfig.local` are skipped, so re-runs
+never clobber customizations.
+
+The original `~/.gitconfig` is then moved to `~/.gitconfig.bak.<timestamp>`
+so you can audit or restore anything the migrator didn't pick up (e.g.
+section-specific `[difftool ...]` blocks). The migrator deliberately does
+NOT move `[core]`, `[diff]`, `[merge]`, `[alias]`, etc. — those are owned
+by the dotfiles base config.
+
 ### Native Windows prerequisites
 
 - **Enable Developer Mode** (Settings → Privacy & security → For developers).

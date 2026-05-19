@@ -1,0 +1,14 @@
+# Unix-only git config overrides — managed by dotfiles repo.
+#
+# Symlinked into ~/.gitconfig.linux ONLY by install.sh (Linux/macOS/WSL/
+# Codespaces). install.ps1 does NOT create this symlink, so on native
+# Windows the [include] in the base .gitconfig silently no-ops.
+#
+# Naming note: the file is called `.linux` for short, but install.sh runs
+# on macOS too and these defaults apply equally well there.
+
+[core]
+    # `vim` is reliably present on Linux/macOS/Codespaces. On Windows the
+    # base .gitconfig leaves `core.editor` unset so git falls back to its
+    # platform default (usually whatever is registered for VS Code / nano).
+    editor = vim

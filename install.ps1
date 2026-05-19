@@ -52,7 +52,31 @@ if (-not (Test-CanCreateSymlink)) {
 }
 
 # ---------------------------------------------------------------------------
-# 1. Packages
+# 1. Ensure HOME env var is set (required for git include-path tilde expansion)
+# ---------------------------------------------------------------------------
+# Git on Windows uses %USERPROFILE% to find ~/.gitconfig, but `~/` inside
+# config *values* (e.g. `[include] path = ~/.gitconfig.local`) expands via
+# $HOME only. Many Windows installs don't set HOME, so include directives
+# silently fail and machine-local sections (user.email, credentials, lfs
+# filter) never get pulled in. Set HOME persistently here so future shells
+# pick it up, and also set it in the current process for any downstream
+# git invocations within this script.
+$persistedHome = [Environment]::GetEnvironmentVariable('HOME', 'User')
+if ([string]::IsNullOrEmpty($persistedHome)) {
+    [Environment]::SetEnvironmentVariable('HOME', $homeDir, 'User')
+    $env:HOME = $homeDir
+    Write-Host "[dotfiles] set persistent User env var HOME = $homeDir (was unset)"
+    Write-Host "[dotfiles]   reason: git tilde expansion in [include] needs HOME"
+    Write-Host "[dotfiles]   note: open a fresh shell for other tools to see it"
+} elseif ($persistedHome -ne $homeDir) {
+    Write-Host "[dotfiles] HOME already set (User) = $persistedHome (leaving as-is)"
+    if (-not $env:HOME) { $env:HOME = $persistedHome }
+} else {
+    if (-not $env:HOME) { $env:HOME = $homeDir }
+}
+
+# ---------------------------------------------------------------------------
+# 2. Packages
 # ---------------------------------------------------------------------------
 function Install-WithWinget {
     param([string]$Id)
@@ -109,7 +133,7 @@ if (Get-Command gh -ErrorAction SilentlyContinue) {
 }
 
 # ---------------------------------------------------------------------------
-# 2. Migrate machine-local sections out of existing ~/.gitconfig
+# 3. Migrate machine-local sections out of existing ~/.gitconfig
 # ---------------------------------------------------------------------------
 # On first run, the user's existing ~/.gitconfig gets moved to a .bak file
 # and replaced by a symlink to the dotfiles version. Without help, that
@@ -182,7 +206,7 @@ function Migrate-LocalSections {
 }
 
 # ---------------------------------------------------------------------------
-# 3. Centralized backups (used by Link-DotFile and Build-GhDashConfig)
+# 4. Centralized backups (used by Link-DotFile and Build-GhDashConfig)
 # ---------------------------------------------------------------------------
 # Anything we overwrite (non-symlink) on a first run goes under one per-run
 # directory: ~/.dotfiles-backup/<timestamp>/<relative-path-under-HOME>.
@@ -249,7 +273,7 @@ function Save-Backup {
 }
 
 # ---------------------------------------------------------------------------
-# 4. Symlink dotfiles into $HOME
+# 5. Symlink dotfiles into $HOME
 # ---------------------------------------------------------------------------
 function Link-DotFile {
     param(
@@ -410,7 +434,7 @@ Build-GhDashConfig -Template    (Join-Path $dotfilesDir '.config\gh-dash\config.
                    -Roots       $ghDashRoots
 
 # ---------------------------------------------------------------------------
-# 5. PowerShell profile — source equivalent of bash_profile (PS-friendly bits)
+# 6. PowerShell profile — source equivalent of bash_profile (PS-friendly bits)
 # ---------------------------------------------------------------------------
 # We do NOT try to source bash_profile from PowerShell — it's bash syntax.
 # If you want shared aliases, put them in a profile.ps1 inside the dotfiles
